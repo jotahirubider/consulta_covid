@@ -70,3 +70,4 @@ NO_PAGE_MSG = "Esta página no se puede mostrar"
 ERROR_FILENAME = "error.log"
 SIP_ERROR_MSG = "Error en número de SIP."
 RUTA_GECKODRIVER_LOG = "C:/Users/%s/geckodriver.log" % getpass.getuser()
+INFO_GRIPE = ("53362520JVV","Y7205459XJ")

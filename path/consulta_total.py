@@ -1,7 +1,7 @@
 import os, logging, platform,time
 os.chdir("//woody/asan/Servicios/EnfermeriaMedPreventiva/prev_dev/consulta_covid/path")
 from utils.win_fun import TaskKill
-from utils.constants import NO_CREDENTIALS_MSG, ERROR_FILENAME, SIP_ERROR_MSG
+from utils.constants import RVN_USER, INFO_GRIPE, NO_CREDENTIALS_MSG, ERROR_FILENAME, SIP_ERROR_MSG
 from covid.consulta_rvn import RVN
 from covid.consulta_redmiva import REDMIVA
 from covid.consulta_ave import AVE
@@ -92,6 +92,9 @@ class ConsultaCOVID:
                 print("Esperando resultados de AVE...".ljust(50," "))
                 print("".center(50,"-"))
                 infeccion = consultar_ave(self.sip)
+            if RVN_USER in INFO_GRIPE:
+                gripe = vacunacion[1]
+                vacunacion = vacunacion[0]
             if not str(vacunacion) == NO_CREDENTIALS_MSG:
                 if not len(vacunacion)==0:
                     vacunacion = vacunacion.drop(columns=["TELEFONO",
@@ -127,7 +130,7 @@ class ConsultaCOVID:
 
 INFECCION (AVE): {}{}
 MICROBIOLOGÍA (REDMIVA){}\n
-VACUNAS{}
+VACUNAS{}{}
 """.format(
 "NOMBRE: " + nombre if not nombre=="" else "\n",
 "SIP: " + self.sip if nombre=="" else "\nSIP: " + self.sip,
@@ -137,7 +140,10 @@ infeccion,
 
 ": " + pruebas if isinstance(pruebas, str) else "\n" + pruebas.to_string(  index=False, justify="left"),
 
-": " + vacunacion if isinstance(vacunacion,str) else "\n" + vacunacion.to_string(index=False, justify="left")) + "\n"
+": " + vacunacion if isinstance(vacunacion,str) else "\n" + vacunacion.to_string(index=False, justify="left") + "\n",
+
+"\nVACUNACION ANTIGRIPAL\nFECHA ÚLT. DOSIS: %s\n" % gripe if RVN_USER in INFO_GRIPE else ""
+)
             root= tk.Tk()
             root.withdraw()
             root.attributes("-topmost", True)

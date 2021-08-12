@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from utils.constants import RVN_USER, RVN_PASS, NO_PAGE_MSG, SIP_ERROR_MSG
+from utils.constants import RVN_USER, RVN_PASS, NO_PAGE_MSG, SIP_ERROR_MSG, INFO_GRIPE
 from utils.win_fun import TaskKill
 from selenium.common.exceptions import (
     JavascriptException,
@@ -159,6 +159,13 @@ class RVN():
             time.sleep(0.1)  
         self.check_no_page_error()
         self.change_to_window("histvacxs")
+        if RVN_USER in INFO_GRIPE:
+            if "GRIPE" in self.driver.page_source:
+                data_gripe = self.driver.find_element_by_xpath(
+                    "//*[contains(text(),'GRIPE')]/..").text
+                fecha_gripe = re.search("\d+/\d+/\d+", data_gripe).group(0)
+            else:
+                fecha_gripe = "NO VACUNADO"
         if "Vacunacion frente a SARS-CoV-2" in self.driver.page_source:
             vacunas = self.driver.find_elements_by_xpath(
                 '//*[contains(text(), "Vacunacion frente a SARS-CoV-2")]/..'
@@ -188,7 +195,10 @@ class RVN():
                 self.driver.execute_script("pulsadoVolver();")
         else: 
             self.df = pd.DataFrame()
-        return self.df
+        if RVN_USER in INFO_GRIPE:
+            return self.df, fecha_gripe
+        else:
+            return self.df
 
     def consulta_unica(self, sip):
         if RVN_USER is None or RVN_PASS is None:
