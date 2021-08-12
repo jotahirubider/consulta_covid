@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Importations
 import os
-os.chdir("//woody/asan/Servicios/EnfermeriaMedPreventiva/prev_dev/path")
+os.chdir("//woody/asan/Servicios/EnfermeriaMedPreventiva/prev_dev/consulta_covid/path")
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait

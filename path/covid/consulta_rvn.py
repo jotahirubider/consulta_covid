@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time, re, os
-os.chdir("//woody/asan/Servicios/EnfermeriaMedPreventiva/prev_dev/path")
+os.chdir("//woody/asan/Servicios/EnfermeriaMedPreventiva/prev_dev/consulta_covid/path")
 import numpy as np
 import pandas as pd
 from selenium import webdriver
@@ -124,10 +124,14 @@ class RVN():
         self.driver.minimize_window()
         self.driver.get("http://rvn.sp.san.gva.es/")
         #Esto no es de este archivo BORRAR
-        self.wait.until(EC.visibility_of_element_located(
-            (By.NAME, "user"))).send_keys(RVN_USER)
-        self.wait.until(EC.visibility_of_element_located(
-            (By.NAME, "password"))).send_keys(RVN_PASS)
+        user = self.wait.until(EC.visibility_of_element_located(
+            (By.NAME, "user")))
+        user.clear()
+        user.send_keys(RVN_USER)
+        password = self.wait.until(EC.visibility_of_element_located(
+            (By.NAME, "password")))
+        password.clear()
+        password.send_keys(RVN_PASS)
         self.driver.find_element_by_xpath("//*[contains(text(),'Entrar')]").click()
         self.change_to_window("PortalSIV")
         main_window_id = self.driver.window_handles[0]

@@ -1,5 +1,5 @@
 import os, logging, platform,time
-os.chdir("//woody/asan/Servicios/EnfermeriaMedPreventiva/prev_dev/path")
+os.chdir("//woody/asan/Servicios/EnfermeriaMedPreventiva/prev_dev/consulta_covid/path")
 from utils.win_fun import TaskKill
 from utils.constants import NO_CREDENTIALS_MSG, ERROR_FILENAME, SIP_ERROR_MSG
 from covid.consulta_rvn import RVN
@@ -78,7 +78,7 @@ class ConsultaCOVID:
                 print("Esperando resultados de RVN...".ljust(50," "))
                 print("".center(50,"-"))
                 vacunacion = consultar_rvn(self.sip)
-                if vacunacion == SIP_ERROR_MSG:
+                if str(vacunacion) == SIP_ERROR_MSG:
                     root= tk.Tk()
                     root.withdraw()
                     root.attributes("-topmost", True)
@@ -111,6 +111,7 @@ class ConsultaCOVID:
                     pruebas = pruebas[pruebas["Determinación"].str.contains("SARS-CoV-2")]
                     pruebas = pruebas[~pruebas["1er. Resultado"].str.contains("Negativo")]
                     pruebas.loc[pruebas["Determinación"].str.contains("RNA Coronavirus"),"Determinación"] = "PCR SARS-CoV-2"
+                    pruebas.loc[pruebas["Determinación"].str.contains("anti-SARS-CoV-2 IgG"),"Determinación"] = "SARS-CoV-2 IgG"
                     if len(pruebas)==0:
                         pruebas = "SIN PRUEBAS"
             if not str(infeccion) == NO_CREDENTIALS_MSG:
