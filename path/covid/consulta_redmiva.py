@@ -35,7 +35,6 @@ class REDMIVA():
             self.sip = sip
             if not self.sip: 
                 return "No se ha ingresado ningún SIP."
-            self.kill.firefox()
             self.driver = webdriver.Firefox(options=self.options,log_path=RUTA_GECKODRIVER_LOG)
             self.wait= WebDriverWait(self.driver,30)
             self.driver.implicitly_wait(0)
