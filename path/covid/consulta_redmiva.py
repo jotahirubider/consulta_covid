@@ -35,7 +35,7 @@ class REDMIVA():
             self.sip = sip
             if not self.sip: 
                 return "No se ha ingresado ningún SIP."
-            self.driver = webdriver.Firefox(options=self.options,log_path=RUTA_GECKODRIVER_LOG)
+            self.driver = webdriver.Firefox(options=self.options,service_log_path=RUTA_GECKODRIVER_LOG)
             self.wait= WebDriverWait(self.driver,30)
             self.driver.implicitly_wait(0)
             self.driver.get("https://redmiva.sp.san.gva.es/redmiva/inicio/menu.faces")
@@ -63,9 +63,13 @@ class REDMIVA():
                     (By.XPATH, "//*[contains(text(),'Ver')]"))).click()
                 redmiva = pd.DataFrame()
                 while True:
-                    tb = self.driver.find_element_by_id("_idJsp2:tablaPruebas").get_attribute("outerHTML")
-                    tb=pd.read_html(tb,header=0)[0]
-                    redmiva = redmiva.append(tb)
+                    try:
+                        tb = self.driver.find_element_by_id("_idJsp2:tablaPruebas").get_attribute("outerHTML")
+                        tb=pd.read_html(tb,header=0)[0]
+                        redmiva = redmiva.append(tb)
+                    except NoSuchElementException:
+                        self.wait.until(EC.visibility_of_element_located((
+                            By.XPATH, "//*[@title='Ir a la solicitud siguiente']"))).click()
                     if REDMIVA_LAST_PAGE_MSG in self.driver.page_source:
                         break
                     else:
