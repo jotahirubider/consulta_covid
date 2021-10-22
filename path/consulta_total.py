@@ -112,7 +112,7 @@ class ConsultaCOVID:
                     pruebas = "SIN PRUEBAS"
                 else:
                     pruebas = pruebas[pruebas["Determinación"].str.contains("SARS-CoV-2")]
-                    pruebas = pruebas[~pruebas["1er. Resultado"].str.contains("Negativo")]
+                    # pruebas = pruebas[~pruebas["1er. Resultado"].str.contains("Negativo")]
                     pruebas.loc[pruebas["Determinación"].str.contains("RNA Coronavirus"),"Determinación"] = "PCR SARS-CoV-2"
                     pruebas.loc[pruebas["Determinación"].str.contains("anti-SARS-CoV-2 IgG"),"Determinación"] = "SARS-CoV-2 IgG"
                     if len(pruebas)==0:
