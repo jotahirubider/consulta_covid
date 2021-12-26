@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import time, re, os
+import time, re, os, glob, getpass
 os.chdir("//woody/asan/Servicios/EnfermeriaMedPreventiva/prev_dev/consulta_covid/path")
 import numpy as np
 import pandas as pd
@@ -21,6 +21,15 @@ from selenium.common.exceptions import (
 from tkinter import filedialog, messagebox
 from tkinter import Tk
 from tkinter import *
+
+temp_folder = "C:/Users/" + getpass.getuser() +"/AppData/Local/Temp"
+files = glob.glob(temp_folder + '/*')
+for f in files:
+    try:
+        os.remove(f)
+    except:
+        pass
+    
 class RVN():
     def __init__(self):
         self.sip = int()
@@ -46,7 +55,6 @@ class RVN():
         for i in range(len(self.driver.window_handles)):
             self.driver.switch_to.window(self.driver.window_handles[i])
             if identificador in self.driver.page_source:
-                self.driver.minimize_window()
                 break
     
     def check_no_page_error(self):
@@ -123,7 +131,6 @@ class RVN():
     
     def consultar_rvn(self):
         # Ir a página de RVN
-        self.driver.minimize_window()
         self.driver.get("http://rvn.sp.san.gva.es/")
         #Esto no es de este archivo BORRAR
         user = self.wait.until(EC.visibility_of_element_located(
@@ -154,35 +161,13 @@ class RVN():
               "arguments[0].click()",
               self.driver.find_element_by_xpath(
                   "//*[contains(text(),'Siguiente')]"))
+        time.sleep(0.5)
         try:
             alert = self.driver.switch_to.alert
             alert.dismiss()
-        except NoAlertPresentException:
-            alert = False
-        if alert:
-            return SIP_ERROR_MSG
-        # time.sleep(0.5)
-        self.change_to_window("selvac")
-        self.nombre,self.fecha_nac,self.edad,self.telefono,self.pobl,self.prov = self.obtener_datos_paciente()
-
-        try:
-            self.driver.execute_script("verHistorialVentana()")
-            # time.sleep(0.5)
-        except JavascriptException: 
-            time.sleep(0.1)  
-        self.check_no_page_error()
-        self.change_to_window("histvacxs")
-        if RVN_USER in INFO_GRIPE:
-            if "GRIPE" in self.driver.page_source:
-                data_gripe = self.driver.find_element_by_xpath(
-                    "//*[contains(text(),'GRIPE')]/..").text
-                fecha_gripe = re.search("\d+/\d+/\d+", data_gripe).group(0)
-            else:
-                fecha_gripe = "NO VACUNADO"
-        if "El paciente seleccionado no posee historial disponible" in self.driver.page_source:
             self.df = pd.DataFrame(
                     {"SIP":self.sip,
-                      "NOMBRE":np.nan,
+                      "NOMBRE":"SIP NO ENCONTRADO",
                       "Nº Dosis":np.nan,
                       "MARCA":np.nan,
                       "FECHA DOSIS":np.nan,
@@ -193,36 +178,27 @@ class RVN():
                       "PROVINCIA":np.nan
                       
                       },index = [0])
-            
-        else:
-            if "Vacunacion frente a SARS-CoV-2" in self.driver.page_source:
-                vacunas = self.driver.find_elements_by_xpath(
-                    '//*[contains(text(), "Vacunacion frente a SARS-CoV-2")]/..'
-                    )
-                claves_vacunas = list(map(lambda x: x.get_attribute("CLAVEACTOVACUNAL"),vacunas))
-                row = 0
-                for i in claves_vacunas:
-                    if row > 0:
-                        self.change_to_window("selvac")
-                        try:
-                            self.driver.execute_script("verHistorialVentana()")
-                            # time.sleep(0.5)
-                        except JavascriptException: 
-                            time.sleep(0.1)  
-                        self.check_no_page_error()
-                        self.change_to_window("histvacxs")
-                    self.ver_acto_vacunal(i)
-                    self.change_to_window("regNoedit")    
-                    self.n_dosis = str(int(self.driver.find_element_by_name("DOSIS1").get_attribute("value")))
-                    self.marca = self.driver.find_element_by_name("LAB").get_attribute("value")
-                    fecha = self.driver.find_element_by_name("FechaVacV").get_attribute("value")
-                    fecha = pd.to_datetime(fecha,format="%d/%m/%Y")
-                    self.fecha = fecha.strftime("%d/%m/%Y")
-                    self.grupo_riesgo = self.driver.find_element_by_id("tabla_actividades").text
-                    self.save(row)
-                    row += 1
-                    self.driver.execute_script("pulsadoVolver();")
-            else: 
+        except NoAlertPresentException:
+            alert = False
+            time.sleep(0.5)
+            self.change_to_window("selvac")
+            self.nombre,self.fecha_nac,self.edad,self.telefono,self.pobl,self.prov = self.obtener_datos_paciente()
+    
+            try:
+                self.driver.execute_script("verHistorialVentana()")
+                # time.sleep(0.5)
+            except JavascriptException: 
+                time.sleep(0.1)  
+            self.check_no_page_error()
+            self.change_to_window("histvacxs")
+            if RVN_USER in INFO_GRIPE:
+                if "GRIPE" in self.driver.page_source:
+                    data_gripe = self.driver.find_element_by_xpath(
+                        "//*[contains(text(),'GRIPE')]/..").text
+                    fecha_gripe = re.search("\d+/\d+/\d+", data_gripe).group(0)
+                else:
+                    fecha_gripe = "NO VACUNADO"
+            if "El paciente seleccionado no posee historial disponible" in self.driver.page_source:
                 self.df = pd.DataFrame(
                         {"SIP":self.sip,
                           "NOMBRE":np.nan,
@@ -236,6 +212,49 @@ class RVN():
                           "PROVINCIA":np.nan
                           
                           },index = [0])
+                
+            else:
+                if "Vacunacion frente a SARS-CoV-2" in self.driver.page_source:
+                    vacunas = self.driver.find_elements_by_xpath(
+                        '//*[contains(text(), "Vacunacion frente a SARS-CoV-2")]/..'
+                        )
+                    claves_vacunas = list(map(lambda x: x.get_attribute("CLAVEACTOVACUNAL"),vacunas))
+                    row = 0
+                    for i in claves_vacunas:
+                        if row > 0:
+                            self.change_to_window("selvac")
+                            try:
+                                self.driver.execute_script("verHistorialVentana()")
+                                # time.sleep(0.5)
+                            except JavascriptException: 
+                                time.sleep(0.1)  
+                            self.check_no_page_error()
+                            self.change_to_window("histvacxs")
+                        self.ver_acto_vacunal(i)
+                        self.change_to_window("regNoedit")    
+                        self.n_dosis = str(int(self.driver.find_element_by_name("DOSIS1").get_attribute("value")))
+                        self.marca = self.driver.find_element_by_name("LAB").get_attribute("value")
+                        fecha = self.driver.find_element_by_name("FechaVacV").get_attribute("value")
+                        fecha = pd.to_datetime(fecha,format="%d/%m/%Y")
+                        self.fecha = fecha.strftime("%d/%m/%Y")
+                        self.grupo_riesgo = self.driver.find_element_by_id("tabla_actividades").text
+                        self.save(row)
+                        row += 1
+                        self.driver.execute_script("pulsadoVolver();")
+                else: 
+                    self.df = pd.DataFrame(
+                            {"SIP":self.sip,
+                              "NOMBRE":np.nan,
+                              "Nº Dosis":np.nan,
+                              "MARCA":np.nan,
+                              "FECHA DOSIS":np.nan,
+                              "TELEFONO":np.nan,
+                              "GRUPO_RIESGO":np.nan,
+                              "FECHA_NAC":np.nan,
+                              "POBLACION":np.nan,
+                              "PROVINCIA":np.nan
+                              
+                              },index = [0])
         return self.df
 
     def consulta_masiva(self, db):

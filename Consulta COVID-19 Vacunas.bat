@@ -1,0 +1,2 @@
+C:\Users\%USERNAME%\Anaconda3\python.exe C:\Users\%USERNAME%\Anaconda3\cwp.py C:\Users\%USERNAME%\Anaconda3 C:\Users\%USERNAME%\Anaconda3\python.exe "\\woody\asan\Servicios\EnfermeriaMedPreventiva\prev_dev\consulta_covid\path\consulta_rvn_mass.py"
+pause
