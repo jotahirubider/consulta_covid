@@ -28,7 +28,7 @@ class AVE():
             self.sip = sip
             if not self.sip: 
                 return "No se ha ingresado ningún SIP."
-            self.driver = webdriver.Firefox(options=self.options,service_log_path=RUTA_GECKODRIVER_LOG)
+            self.driver = webdriver.Firefox(options=self.options,log_path=RUTA_GECKODRIVER_LOG)
             self.wait= WebDriverWait(self.driver,30)
             self.driver.implicitly_wait(0)
             self.driver.delete_all_cookies()
