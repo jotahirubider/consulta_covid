@@ -40,17 +40,17 @@ class REDMIVA():
             self.driver.implicitly_wait(0)
             self.driver.get("https://redmiva.sp.san.gva.es/redmiva/inicio/menu.faces")
             self.wait.until(EC.visibility_of_element_located(
-                (By.ID, "_idJsp2:datosUsuario:portal")
+                (By.ID, "j_username")
                  )).send_keys(REDMIVA_USER)
             self.wait.until(EC.visibility_of_element_located(
-                (By.ID, "_idJsp2:datosUsuario:usuario")
+                (By.ID, "j_password")
                  )).send_keys(REDMIVA_PASS)
             self.wait.until(EC.visibility_of_element_located((
-               By.XPATH, "//*[@value='Aceptar']"))).click()
+               By.XPATH, "//*[@id='submit']"))).click()
             self.wait.until(EC.visibility_of_element_located((
                By.XPATH, "//*[@value='Búsqueda de pruebas por SIP']"))).click()
             fecha_desde = self.wait.until(EC.visibility_of_element_located(
-                (By.ID, "myform:fechaDesde")))
+                (By.ID, "myform:fechaDesde_input")))
             fecha_desde.clear()
             fecha_desde.send_keys("01/01/2020")
             self.driver.find_element_by_id("myform:sipPac").send_keys(sip)
@@ -64,7 +64,7 @@ class REDMIVA():
                 redmiva = pd.DataFrame()
                 while True:
                     try:
-                        tb = self.driver.find_element_by_id("_idJsp2:tablaPruebas").get_attribute("outerHTML")
+                        tb = self.driver.find_element_by_xpath('//*[contains(@id,"tablaPruebas")]').get_attribute("outerHTML")
                         tb=pd.read_html(tb,header=0)[0]
                         redmiva = redmiva.append(tb)
                     except NoSuchElementException:
